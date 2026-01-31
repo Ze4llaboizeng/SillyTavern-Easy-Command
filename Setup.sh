@@ -6,47 +6,36 @@ echo "      SillyTavern Launcher & Manager      "
 echo "========================================"
 echo ""
 
-# ---------------------------------------------------------
-# [NEW] ส่วนตรวจสอบและซ่อมแซม NPM อัตโนมัติ (เพิ่มใหม่)
-# ---------------------------------------------------------
-echo ">> กำลังตรวจสอบความพร้อมของระบบ (Node.js/NPM)..."
+function check_and_fix_npm() {
+    echo ">> กำลังตรวจสอบความพร้อมของ NPM..."
+    
+    if ! command -v npm &> /dev/null; then
+        echo "!! ไม่พบคำสั่ง npm หรือ npm มีปัญหา"
+        echo ">> กำลังพยายามซ่อมแซมโดยใช้ Yarn..."
 
-# เช็คว่ามี npm ไหม
-if ! command -v npm &> /dev/null; then
-    echo "!! ตรวจไม่พบ NPM (หรือไฟล์เสีย) !!"
-    echo ">> กำลังเรียกหน่วยกู้ภัย Yarn มาซ่อมแซม..."
+        if ! command -v yarn &> /dev/null; then
+            echo "   - ไม่พบ Yarn.. กำลังติดตั้ง Yarn via pkg..."
+            pkg install yarn -y
+        fi
 
-    # 1. ถ้าไม่มี yarn ก็ติดตั้ง yarn ก่อน
-    if ! command -v yarn &> /dev/null; then
-        echo "   - ติดตั้ง Yarn..."
-        pkg install yarn -y
-    fi
+        echo "   - กำลังสั่ง Yarn ให้ติดตั้ง npm..."
+        yarn global add npm
 
-    # 2. ใช้ yarn ติดตั้ง npm
-    echo "   - กำลังใช้ Yarn ดาวน์โหลด NPM..."
-    yarn global add npm
-
-    # 3. ตั้งค่า Path ชั่วคราวเพื่อให้ใช้งานได้ทันทีในรอบนี้
-    export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
-
-    # 4. เช็คซ้ำอีกรอบ
-    if command -v npm &> /dev/null; then
-        echo ">> [OK] กู้คืน NPM สำเร็จ! (Version: $(npm -v))"
+        echo "   - กำลังตั้งค่า Path..."
+        export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"
         
-        # ฝัง Path ลงถาวรเผื่อเปิดรอบหน้า
         if ! grep -q "yarn/global/node_modules/.bin" ~/.bashrc; then
              echo 'export PATH="$HOME/.yarn/bin:$HOME/.config/yarn/global/node_modules/.bin:$PATH"' >> ~/.bashrc
         fi
+
+        echo ">> ซ่อมแซมเสร็จสิ้น! ลองตรวจสอบเวอร์ชั่น:"
+        npm -v
     else
-        echo "!! [ERROR] ซ่อมแซมล้มเหลว กรุณาแคปหน้าจอส่งผู้พัฒนา !!"
-        read -p "กด Enter เพื่อจบการทำงาน"
-        exit 1
+        echo ">> NPM ปกติดี (Version: $(npm -v))"
     fi
-else
-    echo ">> [OK] พบ NPM เรียบร้อย (Version: $(npm -v))"
-fi
-echo "----------------------------------------"
-# ---------------------------------------------------------
+    echo "----------------------------------------"
+}
+# ---------------------------------------------
 
 # ตรวจสอบว่ามีโฟลเดอร์ SillyTavern อยู่หรือไม่
 if [ -d "SillyTavern" ]; then
@@ -59,6 +48,9 @@ if [ -d "SillyTavern" ]; then
     read -p "คุณต้องการอัพเดท SillyTavern ก่อนใช้งานหรือไม่? (y/n): " update_choice
 
     cd SillyTavern
+
+    check_and_fix_npm
+    # ----------------------------------------------------
 
     if [[ "$update_choice" == "y" || "$update_choice" == "Y" ]]; then
         echo ">> กำลังรันโหมดอัพเดท..."
@@ -84,8 +76,15 @@ else
 
     if [[ "$install_choice" == "y" || "$install_choice" == "Y" ]]; then
         echo ">> กำลังเริ่มติดตั้งผ่านสคริปต์อัตโนมัติ..."
-        echo ">> คำสั่ง: curl -sL ... | bash"
+        
+        # รันสคริปต์ติดตั้งตามปกติ (ซึ่งในนี้มันจะพยายามลง Nodejs ให้)
         curl -sL https://raw.githubusercontent.com/Rawi1005/st-autoinstall/main/install.sh | bash
+        
+        echo ""
+        echo ">> ติดตั้งเสร็จสิ้น ตรวจสอบความเรียบร้อย..."
+        check_and_fix_npm
+        
+        echo ">> คุณสามารถรันสคริปต์นี้ใหม่อีกครั้งเพื่อเปิดใช้งาน"
     else
         echo ">> ยกเลิกการติดตั้ง"
     fi
