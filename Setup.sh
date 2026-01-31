@@ -16,7 +16,7 @@ echo ""
 if [ -d "SillyTavern" ]; then
     # ================= กรณีติดตั้งแล้ว =================
     echo -e "${GREEN}✅ ตรวจพบการติดตั้ง SillyTavern แล้ว!${NC}"
-    echo -e "${YELLOW}💡 คุณรันคำสั่งนี้เพราะต้องการเปิด SillyTavern ใช่ไหมครับ?${NC}"
+    echo -e "${YELLOW}💡 คุณรันคำสั่งนี้เพราะต้องการเปิด SillyTavern ใช่ไหม?${NC}"
     echo ""
     
     echo -e "คุณต้องการ ${CYAN}อัปเดต (git pull)${NC} ให้เป็นเวอร์ชันล่าสุดก่อนเปิดไหม?"
@@ -36,7 +36,7 @@ if [ -d "SillyTavern" ]; then
     fi
 
     echo ""
-    echo -e "${BOLD}🚀 กำลังเริ่มระบบ SillyTavern... ขอให้สนุกครับ!${NC}"
+    echo -e "${BOLD}🚀 กำลังเริ่มระบบ SillyTavern... ขอให้สนุก!${NC}"
     echo -e "${CYAN}--------------------------------------------${NC}"
     ./start.sh
 
